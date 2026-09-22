@@ -701,16 +701,19 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
+    # Resolve user paths before they cross the worktree CWD boundary: the TAPE
+    # subprocess runs with cwd=worktree, so relative paths would resolve there.
+    output = args.output.resolve()
     report = run(
-        input_path=args.input,
-        output=args.output,
-        worktree=args.worktree,
-        checkpoint=args.checkpoint,
-        python=args.python,
+        input_path=args.input.resolve(),
+        output=output,
+        worktree=args.worktree.resolve(),
+        checkpoint=args.checkpoint.resolve(),
+        python=(args.python.resolve() if not args.python.is_absolute() else args.python),
         patch_size=args.patch_size,
     )
-    args.output.mkdir(parents=True, exist_ok=True)
-    report_path = args.output / "report.json"
+    output.mkdir(parents=True, exist_ok=True)
+    report_path = output / "report.json"
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["status"] == "ok" else 1

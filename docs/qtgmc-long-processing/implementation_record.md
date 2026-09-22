@@ -488,3 +488,16 @@ Re-run `status` and `estimate` to refresh chunk counts, ETA, and disk margin. Wa
 - input/ media assets were untracked and gitignored (they must not be published with the remote).
 - Verification: root unit group 146 passed, 77 deselected, EXIT 0 (fresh --basetemp); worktree suite 105 passed, 1 skipped, EXIT 0 (fresh --basetemp).
 - PLAN DEVIATION: none.
+
+
+### Short-runner relative-path fix + operator E2E (2026-09-22)
+
+- Bug: `scripts/run_short_inference.py` passed unresolved relative CLI paths into the TAPE subprocess (`cwd=worktree`), so frame extraction looked for the input inside the worktree.
+- Fix: resolve input/output/worktree/checkpoint (and relative python) before `run()`; write `report.json` against the resolved output path.
+- Regression: `tests/test_short_inference_contract.py::test_cli_resolves_relative_paths_before_tape_subprocess`.
+- Operator docs: `docs/操作マニュアル.md` added; helper scripts `work/logs/qtgmc-long-processing/e2e_live.sh` and `e2e_short_contract.sh`.
+- Real-clip verification (user-run, WSL ROCm):
+  - raw TAPE smoke on `input/VHS_10s_704x396.mkv`: EXIT 0 / restored_frames=297
+  - official short-contract on same clip: report status=ok / contract.passed=true / 297 frames FFV1+AAC
+  - `VHS_10s_ready.mkv` + preprocess none: HIP OOM (~10.99 GiB) under shared WDDM VRAM
+- PLAN DEVIATION: none.

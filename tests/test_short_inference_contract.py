@@ -6,6 +6,7 @@ The real VHS clip run (plan Task 8 Step 5) is a separate integration milestone.
 """
 
 import json
+import shutil
 import sys
 import subprocess
 from pathlib import Path
@@ -665,3 +666,27 @@ def test_default_worktree_points_at_tape_patch_checkout() -> None:
 
     assert args.worktree == resolve_tape_worktree()
     assert args.worktree == ROOT / "worktrees" / "tape-qtgmc-long-processing"
+
+
+def test_cli_resolves_relative_paths_before_tape_subprocess(vhs_fixture: Path, tmp_path: Path, monkeypatch):
+    # Regression: the TAPE subprocess runs with cwd=worktree, so relative CLI
+    # paths must be resolved against the process CWD before that boundary,
+    # otherwise the input file is looked up inside the worktree and frame
+    # extraction fails.
+    worktree = tmp_path / "wt"
+    worktree.mkdir(parents=True, exist_ok=True)
+    (worktree / "real_world_inference.py").write_text(STUB_TAPE, encoding="utf-8")
+
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    shutil.copyfile(vhs_fixture, cwd / "in.mkv")
+    monkeypatch.chdir(cwd)
+    exit_code = rsi.main([
+        "--input", "in.mkv",
+        "--checkpoint", "ckpt.pth",
+        "--output", "out",
+        "--worktree", str(worktree),
+    ])
+    assert exit_code == 0
+    payload = json.loads((cwd / "out" / "report.json").read_text(encoding="utf-8"))
+    assert payload["status"] == "ok"
