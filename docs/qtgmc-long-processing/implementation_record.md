@@ -476,3 +476,15 @@ Re-run `status` and `estimate` to refresh chunk counts, ETA, and disk margin. Wa
 - Deviation from the advisory: the resolve_tape_worktree fallback is the pinned patch worktree, not the bare TAPE/ clone - the clone sits at unpatched upstream (fb97c60) without the external-reference CLI, and the pipeline's fail-closed design requires the patch branch.
 - Verification: Windows root unit group 141 passed, 77 deselected, EXIT 0 (fresh --basetemp); Windows worktree suite 105 passed, 1 skipped, EXIT 0 (fresh --basetemp); WSL canonical gate root: 217 passed + 1 failed (test_tc01_vapoursynth_preflight only, environment-caused, same RED as Task 15 record); WSL canonical gate worktree (gate_wt_wsl.sh): 116 passed, EXIT 0.
 - PLAN DEVIATION: none - no task scope, gate, or acceptance criteria changed; only test placement and import topology moved.
+
+### Boundary hardening (2026-09-22)
+
+- Follow-up to the import-isolation resolution: explicit host-boundary hardening.
+- tests/test_paths.py: resolve_tape_worktree precedence contracts (explicit argument > TAPE_WORKTREE env var > pinned worktree; empty env falls through) plus a guard test that the host test process never imported real_world_inference.
+- test_default_worktree_points_at_tape_patch_checkout now asserts args.worktree == resolve_tape_worktree() == ROOT/worktrees/tape-qtgmc-long-processing.
+- pytest.ini: norecursedirs = worktrees TAPE, so a bare pytest run from the root never collects the TAPE worktree suite.
+- conftest.py is docstring-only (no sys.path manipulation); scripts/__init__.py makes scripts/ an explicit package.
+- install_vapoursynth.ps1: $projectRoot now resolves to the repository root (the pre-move double-parent expression pointed outside the repository).
+- input/ media assets were untracked and gitignored (they must not be published with the remote).
+- Verification: root unit group 146 passed, 77 deselected, EXIT 0 (fresh --basetemp); worktree suite 105 passed, 1 skipped, EXIT 0 (fresh --basetemp).
+- PLAN DEVIATION: none.
