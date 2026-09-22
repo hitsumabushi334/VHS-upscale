@@ -661,4 +661,7 @@ def test_default_worktree_points_at_tape_patch_checkout() -> None:
     args = rsi.build_parser().parse_args(
         ["--input", "in.mkv", "--checkpoint", "ckpt.pth", "--output", "out"]
     )
+    from pipeline.paths import resolve_tape_worktree
+
+    assert args.worktree == resolve_tape_worktree()
     assert args.worktree == ROOT / "worktrees" / "tape-qtgmc-long-processing"

@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 
 $scriptRoot = Split-Path -Parent $PSScriptRoot
 $requirementsPath = Join-Path $scriptRoot 'requirements-vapoursynth.txt'
-$projectRoot = Split-Path -Parent (Split-Path -Parent $scriptRoot)
+$projectRoot = $scriptRoot
 $logDirectory = Join-Path $projectRoot 'work\logs\qtgmc-long-processing'
 $pythonPath = 'C:\Python313\python.exe'
 
