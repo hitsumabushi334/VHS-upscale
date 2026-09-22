@@ -6,6 +6,8 @@
 > 設計根拠: `docs/superpowers/specs/2026-09-14-rx7900xt-tape-rocm-design.md`  
 > 詳細テスト: `@./test_cases.md`  
 > 独立レビュー: `cursor/glm-5.2`（Critical 0、Important 8。全必須指摘を反映）
+> 注意(2026-09-22 構造修正): 本計画 §2 の「実装対象repositoryはTAPE worktreeである」は、設計書の repository root 規定に従い **VHS-upscale ルート(`E:/vhs-upscale`)へ置き換え済み**。実施詳細は `docs/qtgmc-long-processing/implementation_record.md` の "Structural correction record (2026-09-22)" を参照。TAPE worktree は TAPE 側 patch のみ(ローカル保持)。本計画の各Task定義・gate・完了条件は有効。
+
 
 ## 1. 目的
 

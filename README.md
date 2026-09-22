@@ -95,8 +95,10 @@ python -m pytest -m e2e              # 実 29.97i 素材が必要(現状 Task 14
 ```
 
 canonical green は WSL ハーネス(`wsl.exe -d Ubuntu-22.04`、venv python、
-`/mnt/e` 経由)で判定する。WSL ゲートスクリプトは
-`work/logs/qtgmc-long-processing/` に置いている。
+`/mnt/e` 経由)で判定する。root の canonical ゲートスクリプトは
+`work/logs/qtgmc-long-processing/gate_root_wsl.sh`。同ディレクトリの
+`taskN_wsl.sh` / `gateN_wsl.sh` は構造修正前の歴史的スクリプト(worktree 旧
+レイアウトを前提)であり再利用しない(deprecated ヘッダ付き)。
 
 ## 現状(2026-09-22)
 

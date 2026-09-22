@@ -832,7 +832,12 @@ def _load_default_tape_runner() -> Runner:
         raise RunLocalError(
             "real TAPE preview requires TAPE_CHECKPOINT; inject tape_runner for offline runs"
         )
-    worktree = Path(os.environ.get("TAPE_WORKTREE", Path.cwd()))
+    worktree = Path(
+        os.environ.get(
+            "TAPE_WORKTREE",
+            str(Path(__file__).resolve().parents[1] / "worktrees" / "tape-qtgmc-long-processing"),
+        )
+    )
     checkpoint = Path(checkpoint_text)
 
     def runner(

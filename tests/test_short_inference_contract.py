@@ -654,3 +654,11 @@ def test_cli_writes_report_and_exits_nonzero_on_failure(vhs_fixture: Path, tmp_p
     payload = json.loads(report_path.read_text(encoding="utf-8"))
     assert payload["status"] == "contract_failed"
     assert payload["contract"]["frame_count"]["ok"] is False
+
+
+def test_default_worktree_points_at_tape_patch_checkout() -> None:
+    """The CLI --worktree default pins the local TAPE patch checkout layout."""
+    args = rsi.build_parser().parse_args(
+        ["--input", "in.mkv", "--checkpoint", "ckpt.pth", "--output", "out"]
+    )
+    assert args.worktree == ROOT / "worktrees" / "tape-qtgmc-long-processing"
