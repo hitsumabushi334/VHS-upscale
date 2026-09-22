@@ -462,3 +462,17 @@ Re-run `status` and `estimate` to refresh chunk counts, ETA, and disk margin. Wa
 - M3 (record wording): the 1c7556a bullet now states the prepend form landed in 16b5cdf.
 - Post-fix verification: new contract test 1 passed; Windows root unit group 157 passed, 77 deselected, EXIT 0 (fresh --basetemp).
 - PLAN DEVIATION: none.
+
+### Import-isolation review resolution (2026-09-22)
+
+- Trigger: follow-up advisory on the structural-correction review (blocker) required import isolation: host (VHS-upscale root) tests must not import TAPE code (real_world_inference / worktree utils); TAPE-side tests belong in the TAPE worktree; the pinned worktree path must be resolved by a single shared helper.
+- pipeline/paths.py: new `resolve_tape_worktree(explicit=None)` - precedence explicit argument > TAPE_WORKTREE env var > pinned local worktree (worktrees/tape-qtgmc-long-processing). Wired into pipeline/run_local.py (`_load_default_tape_runner`) and scripts/run_short_inference.py (`--worktree` default); the duplicate `contextlib` import in run_local.py removed.
+- conftest.py deleted; both pytest.ini files (root and worktree) now carry `pythonpath = .` instead of any sys.path manipulation.
+- Root `utils/` is now a self-contained copy (reference_selection.py, real_world_helpers.py, __init__.py). Root pipeline and tests import root `utils/`; the worktree's real_world_inference.py keeps consuming the worktree's own `utils/`. No cross-repository imports remain.
+- tests/test_tape_chunk.py split at the dependency boundary: the pipeline-side tests (TC-28/TC-30/TC-31 groups, stub-runner based) stay in root tests/test_tape_chunk.py; the TAPE external-reference-mode tests moved to worktree tests/test_external_reference.py (they drive real_world_inference directly and cannot live in the host).
+- tests/test_real_world_helpers.py restored to the worktree tests/ (it tests worktree-side utils).
+- The torch-free real_world_inference import check moved from root tests/test_reference_cache.py to worktree tests/test_inference_contract.py::test_real_world_inference_imports_without_torch.
+- Verified: no root test file imports real_world_inference (grep-clean).
+- Deviation from the advisory: the resolve_tape_worktree fallback is the pinned patch worktree, not the bare TAPE/ clone - the clone sits at unpatched upstream (fb97c60) without the external-reference CLI, and the pipeline's fail-closed design requires the patch branch.
+- Verification: Windows root unit group 141 passed, 77 deselected, EXIT 0 (fresh --basetemp); Windows worktree suite 105 passed, 1 skipped, EXIT 0 (fresh --basetemp); WSL canonical gate root: 217 passed + 1 failed (test_tc01_vapoursynth_preflight only, environment-caused, same RED as Task 15 record); WSL canonical gate worktree (gate_wt_wsl.sh): 116 passed, EXIT 0.
+- PLAN DEVIATION: none - no task scope, gate, or acceptance criteria changed; only test placement and import topology moved.
