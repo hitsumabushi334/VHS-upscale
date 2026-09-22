@@ -1,0 +1,27 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.3.5, pluggy-1.6.0 -- /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna
+configfile: pytest.ini
+collecting ... collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_inference_contract.py _______________
+ImportError while importing test module '/mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/tests/test_inference_contract.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_inference_contract.py:9: in <module>
+    from real_world_inference import build_parser, write_lossless_frame
+real_world_inference.py:16: in <module>
+    from data.real_world_video_dataset import RealWorldVideoDataset
+data/real_world_video_dataset.py:10: in <module>
+    from utils.utils import preprocess
+utils/utils.py:6: in <module>
+    from pytorch_lightning.loggers import CometLogger
+E   ModuleNotFoundError: No module named 'pytorch_lightning'
+=========================== short test summary info ============================
+ERROR tests/test_inference_contract.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 30.61s ===============================

@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.3.5, pluggy-1.6.0 -- /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna
+configfile: pytest.ini
+collecting ... collected 8 items
+
+tests/test_asset_contract.py::test_manifest_schema_roundtrip PASSED      [ 12%]
+tests/test_asset_contract.py::test_hash_changed_asset_is_not_reused PASSED [ 25%]
+tests/test_asset_contract.py::test_raw_state_dict_container_is_accepted PASSED [ 37%]
+tests/test_asset_contract.py::test_lightning_wrapper_container_is_accepted PASSED [ 50%]
+tests/test_asset_contract.py::test_unknown_checkpoint_container_is_rejected PASSED [ 62%]
+tests/test_asset_contract.py::test_missing_and_unexpected_keys_are_reported PASSED [ 75%]
+tests/test_asset_contract.py::test_forward_smoke_shape_and_finite_with_small_module PASSED [ 87%]
+tests/test_asset_contract.py::test_smoke_load_uses_weights_only_preferred PASSED [100%]
+
+============================== 8 passed in 13.75s ==============================

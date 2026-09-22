@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.3.5, pluggy-1.6.0 -- /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna
+configfile: pytest.ini
+collecting ... collected 4 items
+
+tests/test_real_world_helpers.py::test_reference_indexes_are_mapped_back_to_source_names PASSED [ 25%]
+tests/test_real_world_helpers.py::test_empty_candidates_fall_back_deterministically PASSED [ 50%]
+tests/test_real_world_helpers.py::test_reference_shortage_is_padded_to_requested_count PASSED [ 75%]
+tests/test_real_world_helpers.py::test_portrait_and_landscape_dimensions PASSED [100%]
+
+============================== 4 passed in 0.77s ===============================

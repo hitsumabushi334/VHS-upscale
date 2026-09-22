@@ -1,0 +1,29 @@
+{
+  "cuda_available": true,
+  "device_name": "AMD Radeon RX 7900 XT",
+  "dxg": {
+    "exists": true,
+    "path": "/dev/dxg"
+  },
+  "error": null,
+  "fp16_error": null,
+  "fp16_finite": true,
+  "fp32_finite": true,
+  "hip": "7.2.26015-fc0010cf6a",
+  "os": {
+    "id": "ubuntu",
+    "name": "Ubuntu",
+    "path": "/etc/os-release",
+    "version_id": "22.04"
+  },
+  "profile": "rx7900xt",
+  "python": {
+    "executable": "/mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm.staging..venv-rocm.6e78cb450435672e2dcc82bac7c7d377.8RdXH3/bin/python",
+    "version": "3.10.12"
+  },
+  "runtime": "legacy",
+  "schema_version": 1,
+  "status": "ok",
+  "supported_setup": "legacy-rocm-7.2",
+  "torch": "2.9.1+rocm7.2.0.git7e1940d4"
+}

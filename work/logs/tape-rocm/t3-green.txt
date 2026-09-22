@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.3.5, pluggy-1.6.0 -- /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna
+configfile: pytest.ini
+collecting ... collected 5 items
+
+tests/test_inference_contract.py::test_parser_defaults_to_png PASSED     [ 20%]
+tests/test_inference_contract.py::test_frame_writer_rejects_lossy_extension PASSED [ 40%]
+tests/test_inference_contract.py::test_frame_writer_writes_png PASSED    [ 60%]
+tests/test_inference_contract.py::test_dataset_import_does_not_import_lightning PASSED [ 80%]
+tests/test_inference_contract.py::test_init_logger_explains_optional_lightning_dependency PASSED [100%]
+
+============================== 5 passed in 29.02s ==============================

@@ -1,0 +1,718 @@
+......................F..............FF.....FF....................F.F... [ 66%]
+......F.......FF.FFFFF..............                                     [100%]
+=================================== FAILURES ===================================
+_______ test_runtime_probe_reports_legacy_hsa_guard_without_host_changes _______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_runtime_probe_reports_legacy_hsa_guard_without_host_changes0')
+
+    def test_runtime_probe_reports_legacy_hsa_guard_without_host_changes(tmp_path: Path) -> None:
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+        before = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*"))
+    
+        legacy = _run_setup(
+            ["--dry-run", "--runtime-probe", "legacy", "--tmp-root", str(temp_root)]
+        )
+        rocdxg = _run_setup(
+            ["--dry-run", "--runtime-probe", "rocdxg", "--tmp-root", str(temp_root)]
+        )
+    
+        assert legacy.returncode == 0, _combined(legacy)
+        assert "runtime=legacy" in legacy.stdout
+        assert "replace_legacy_hsa=true" in legacy.stdout
+        assert "supported_setup=legacy-rocm-7.2" in legacy.stdout
+>       assert rocdxg.returncode == 0, _combined(rocdxg)
+E       AssertionError: 
+E         ERROR: conflicting runtime sources: venv-marker=legacy
+E         probe=rocdxg
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['bash', '/mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/scripts/wsl/setup_rocm_env.sh', '.../temporary'], returncode=1, stdout='', stderr='ERROR: conflicting runtime sources: venv-marker=legacy\nprobe=rocdxg\n').returncode
+
+tests/test_rocm_scripts.py:1370: AssertionError
+___ test_replacement_between_rollback_validation_and_quarantine_is_preserved ___
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_replacement_between_rollback_validation_and_quarantine_is_preserved0')
+
+    def test_replacement_between_rollback_validation_and_quarantine_is_preserved(
+        tmp_path: Path,
+    ) -> None:
+        host = _fake_host(tmp_path, venv_pip="fail")
+        venv = tmp_path / ".venv-rocm"
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+        marker = tmp_path / "rollback-race"
+        validation = tmp_path / "rollback-validated"
+    
+        result = _run_setup_with_fake_commands(
+            [
+                "--runtime",
+                "legacy",
+                *_setup_args(host, venv),
+                "--tmp-root",
+                str(temp_root),
+            ],
+            marker=marker,
+            rollback_stall=validation,
+            rollback_replacement=venv,
+        )
+    
+        assert result.returncode != 0, _combined(result)
+        assert (venv / "sentinel").read_text(encoding="utf-8") == "replacement-creator\n"
+        assert not list(temp_root.iterdir())
+>       assert not list(tmp_path.glob(".venv-rocm.rocm-quarantine.*"))
+E       AssertionError: assert not [PosixPath('/tmp/pytest-of-root/pytest-2/test_replacement_between_rollback_validation_and_quarantine_is_preserved0/.venv-rocm.rocm-quarantine.UGwzMw.delete-2876-0')]
+E        +  where [PosixPath('/tmp/pytest-of-root/pytest-2/test_replacement_between_rollback_validation_and_quarantine_is_preserved0/.venv-rocm.rocm-quarantine.UGwzMw.delete-2876-0')] = list(<generator object Path.glob at 0x777fa168e260>)
+E        +    where <generator object Path.glob at 0x777fa168e260> = glob('.venv-rocm.rocm-quarantine.*')
+E        +      where glob = PosixPath('/tmp/pytest-of-root/pytest-2/test_replacement_between_rollback_validation_and_quarantine_is_preserved0').glob
+
+tests/test_rocm_scripts.py:1792: AssertionError
+_ test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved0')
+
+    def test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved(
+        tmp_path: Path,
+    ) -> None:
+        host = _fake_host(tmp_path, venv_pip="fail")
+        venv = tmp_path / ".venv-rocm"
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+        marker = tmp_path / "rollback-object-race"
+        validation = tmp_path / "rollback-object-validated"
+    
+        result = _run_setup_with_fake_commands(
+            [
+                "--runtime",
+                "legacy",
+                *_setup_args(host, venv),
+                "--tmp-root",
+                str(temp_root),
+            ],
+            marker=marker,
+            rollback_stall=validation,
+            rollback_replacement=venv,
+            rollback_replacement_kind="file",
+        )
+    
+        assert result.returncode != 0, _combined(result)
+        assert venv.read_text(encoding="utf-8") == "replacement-object\n"
+        assert not list(temp_root.iterdir())
+>       assert not list(tmp_path.glob(".venv-rocm.rocm-quarantine.*"))
+E       AssertionError: assert not [PosixPath('/tmp/pytest-of-root/pytest-2/test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved0/.venv-rocm.rocm-quarantine.uoofBt.delete-3076-0')]
+E        +  where [PosixPath('/tmp/pytest-of-root/pytest-2/test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved0/.venv-rocm.rocm-quarantine.uoofBt.delete-3076-0')] = list(<generator object Path.glob at 0x777fa168de00>)
+E        +    where <generator object Path.glob at 0x777fa168de00> = glob('.venv-rocm.rocm-quarantine.*')
+E        +      where glob = PosixPath('/tmp/pytest-of-root/pytest-2/test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved0').glob
+
+tests/test_rocm_scripts.py:1822: AssertionError
+_ test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[INT-130] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[INT-130]0')
+signal_name = 'INT', expected_status = 130
+
+    @pytest.mark.parametrize(
+        ("signal_name", "expected_status"),
+        [("INT", 130), ("TERM", 143), ("HUP", 129)],
+    )
+    def test_readiness_failure_after_spawn_drains_group_and_honors_first_signal(
+        tmp_path: Path, signal_name: str, expected_status: int
+    ) -> None:
+        host = _fake_host(tmp_path)
+        venv = tmp_path / ".venv-rocm"
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+        marker = tmp_path / "readiness-failure"
+        pid_file = tmp_path / "readiness-failure-command.pid"
+        failure_stall = tmp_path / "readiness-failure-after-spawn"
+    
+        result = _run_setup_with_signal(
+            ["--runtime", "legacy", *_setup_args(host, venv), "--tmp-root", str(temp_root)],
+            env={},
+            marker=marker,
+            pid_file=pid_file,
+            signal_name=signal_name,
+            readiness_failure=True,
+            readiness_failure_stall=failure_stall,
+        )
+    
+        assert result.returncode == expected_status, _combined(result)
+>       assert "started" in marker.read_text(encoding="utf-8")
+
+tests/test_rocm_scripts.py:1993: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.10/pathlib.py:1134: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-root/pytest-2/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[INT-130]0/readiness-failure')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-2/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[INT-130]0/readiness-failure'
+
+/usr/lib/python3.10/pathlib.py:1119: FileNotFoundError
+_ test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[TERM-143] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[TERM-143]0')
+signal_name = 'TERM', expected_status = 143
+
+    @pytest.mark.parametrize(
+        ("signal_name", "expected_status"),
+        [("INT", 130), ("TERM", 143), ("HUP", 129)],
+    )
+    def test_readiness_failure_after_spawn_drains_group_and_honors_first_signal(
+        tmp_path: Path, signal_name: str, expected_status: int
+    ) -> None:
+        host = _fake_host(tmp_path)
+        venv = tmp_path / ".venv-rocm"
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+        marker = tmp_path / "readiness-failure"
+        pid_file = tmp_path / "readiness-failure-command.pid"
+        failure_stall = tmp_path / "readiness-failure-after-spawn"
+    
+        result = _run_setup_with_signal(
+            ["--runtime", "legacy", *_setup_args(host, venv), "--tmp-root", str(temp_root)],
+            env={},
+            marker=marker,
+            pid_file=pid_file,
+            signal_name=signal_name,
+            readiness_failure=True,
+            readiness_failure_stall=failure_stall,
+        )
+    
+        assert result.returncode == expected_status, _combined(result)
+>       assert "started" in marker.read_text(encoding="utf-8")
+
+tests/test_rocm_scripts.py:1993: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.10/pathlib.py:1134: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-root/pytest-2/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[TERM-143]0/readiness-failure')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-2/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[TERM-143]0/readiness-failure'
+
+/usr/lib/python3.10/pathlib.py:1119: FileNotFoundError
+_____ test_new_venv_is_rolled_back_after_failure_and_retry_can_recreate_it _____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_new_venv_is_rolled_back_after_failure_and_retry_can_recreate_it0')
+native_publication_root = '/tmp/task4-publication-f4871aa6637b4ead8de0c311ee1f8969'
+
+    def test_new_venv_is_rolled_back_after_failure_and_retry_can_recreate_it(
+        tmp_path: Path, native_publication_root: str
+    ) -> None:
+        venv, temp_root = _native_publication_paths(native_publication_root)
+        rocm_root = tmp_path / "rocm"
+        (rocm_root / "lib").mkdir(parents=True)
+        (rocm_root / "lib" / "libhsa-runtime64.so.1.2").touch()
+        marker = tmp_path / "retry-contract"
+        failed_report = tmp_path / "retry-failure-state"
+    
+        failing_host = _fake_host(tmp_path, venv_pip="fail")
+        failed = _run_setup_with_fake_commands(
+            [
+                "--runtime",
+                "legacy",
+                *_setup_args(failing_host, venv),
+                "--tmp-root",
+                str(temp_root),
+                "--rocm-root",
+                str(rocm_root),
+            ],
+            marker=marker,
+            publication_report=failed_report,
+            publication_root=native_publication_root,
+        )
+    
+        assert failed.returncode != 0, _combined(failed)
+        failed_state = _native_publication_state(failed_report)
+        assert failed_state["final"] == "false"
+        assert failed_state["staging_count"] == "0"
+        assert failed_state["temporary_nonempty"] == "false"
+    
+        successful_host = _fake_host(tmp_path, venv_pip="ok")
+        success_report = tmp_path / "retry-success-state"
+>       retried = _run_setup_with_fake_commands(
+            [
+                "--runtime",
+                "legacy",
+                *_setup_args(successful_host, venv),
+                "--tmp-root",
+                str(temp_root),
+                "--rocm-root",
+                str(rocm_root),
+            ],
+            marker=marker,
+            publication_report=success_report,
+            publication_root=native_publication_root,
+        )
+
+tests/test_rocm_scripts.py:2281: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_rocm_scripts.py:826: in _run_setup_with_fake_commands
+    fake_bin.mkdir()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-root/pytest-2/test_new_venv_is_rolled_back_after_failure_and_retry_can_recreate_it0/fake-bin')
+mode = 511, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           self._accessor.mkdir(self, mode)
+E           FileExistsError: [Errno 17] File exists: '/tmp/pytest-of-root/pytest-2/test_new_venv_is_rolled_back_after_failure_and_retry_can_recreate_it0/fake-bin'
+
+/usr/lib/python3.10/pathlib.py:1175: FileExistsError
+______ test_failed_install_retains_owned_staging_without_publishing_venv _______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_failed_install_retains_owned_staging_without_publishing_venv0')
+
+    def test_failed_install_retains_owned_staging_without_publishing_venv(
+        tmp_path: Path,
+    ) -> None:
+        host = _fake_host(tmp_path, venv_pip="fail")
+        venv = tmp_path / ".venv-rocm"
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+    
+        result = _run_setup_with_fake_commands(
+            ["--runtime", "legacy", *_setup_args(host, venv), "--tmp-root", str(temp_root)],
+            marker=tmp_path / "staging-contract",
+        )
+    
+        assert result.returncode != 0, _combined(result)
+        assert not venv.exists()
+        staging_paths = list(tmp_path.glob(".venv-rocm.staging.*"))
+>       assert len(staging_paths) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_rocm_scripts.py:2358: AssertionError
+_______________ test_retained_staging_is_reused_by_direct_retry ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_retained_staging_is_reused_by_direct_retry0')
+native_publication_root = '/tmp/task4-publication-e51b7ca1554e448c92254634005173bc'
+
+    def test_retained_staging_is_reused_by_direct_retry(
+        tmp_path: Path, native_publication_root: str
+    ) -> None:
+        host, rocm_root = _successful_legacy_setup_inputs(tmp_path)
+        venv, temp_root = _native_publication_paths(native_publication_root)
+        failed_report = tmp_path / "publication-retry-failure-state"
+        failure_stall = tmp_path / "publication-retry-failure-stall"
+    
+        failed = _run_setup_with_fake_commands(
+            [
+                "--runtime",
+                "legacy",
+                *_setup_args(host, venv),
+                "--tmp-root",
+                str(temp_root),
+                "--rocm-root",
+                str(rocm_root),
+            ],
+            marker=tmp_path / "publication-retry-failure",
+            publication_failure=True,
+            publication_stall=failure_stall,
+            publication_report=failed_report,
+            publication_root=native_publication_root,
+        )
+    
+        assert failed.returncode != 0, _combined(failed)
+        _assert_native_retained_staging(_native_publication_state(failed_report), failed)
+    
+        success_report = tmp_path / "publication-retry-success-state"
+    
+>       retried = _run_setup_with_fake_commands(
+            [
+                "--runtime",
+                "legacy",
+                *_setup_args(host, venv),
+                "--tmp-root",
+                str(temp_root),
+                "--rocm-root",
+                str(rocm_root),
+            ],
+            marker=tmp_path / "publication-retry-success",
+            publication_report=success_report,
+            publication_root=native_publication_root,
+        )
+
+tests/test_rocm_scripts.py:2649: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_rocm_scripts.py:826: in _run_setup_with_fake_commands
+    fake_bin.mkdir()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-root/pytest-2/test_retained_staging_is_reused_by_direct_retry0/fake-bin')
+mode = 511, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           self._accessor.mkdir(self, mode)
+E           FileExistsError: [Errno 17] File exists: '/tmp/pytest-of-root/pytest-2/test_retained_staging_is_reused_by_direct_retry0/fake-bin'
+
+/usr/lib/python3.10/pathlib.py:1175: FileExistsError
+___________ test_check_rocm_accepts_a_validated_venv_runtime_marker ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_accepts_a_validated_venv_runtime_marker0')
+
+    def test_check_rocm_accepts_a_validated_venv_runtime_marker(tmp_path: Path) -> None:
+        venv = tmp_path / ".venv-rocm"
+        venv.mkdir()
+        _write_text(
+            venv / ".rocm-runtime",
+            "runtime=legacy\nsupported_setup=legacy-rocm-7.2\n",
+        )
+        result, output = _run_check(
+            tmp_path,
+            "__version__ = '2.9.1+rocm7.2.0'\n"
+            "class _Version: hip = '7.2.0'\n"
+            "version = _Version()\n"
+            "float32 = 'float32'\n"
+            "float16 = 'float16'\n"
+            "class _Value:\n"
+            "    def all(self): return self\n"
+            "    def item(self): return True\n"
+            "class _Cuda:\n"
+            "    @staticmethod\n"
+            "    def is_available(): return True\n"
+            "    @staticmethod\n"
+            "    def get_device_name(index): return 'AMD Radeon RX 7900 XT'\n"
+            "cuda = _Cuda()\n"
+            "def ones(shape, *, dtype, device): return object()\n"
+            "def matmul(left, right): return object()\n"
+            "def isfinite(value): return _Value()\n",
+            args=["--venv", str(venv)],
+        )
+    
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:2997: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': True, 'device_name': 'AMD Radeon RX 7900 XT', 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_check_rocm_accepts_a_validated_venv_runtime_marker0/dxg'}, 'error': None, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_accepts_a_validated_venv_runtime_marker0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+_______ test_check_rocm_writes_schema_valid_json_when_torch_import_exits _______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_torch_import_exits0')
+
+    def test_check_rocm_writes_schema_valid_json_when_torch_import_exits(tmp_path: Path) -> None:
+        result, output = _run_check(tmp_path, "raise SystemExit('torch import exited')\n")
+    
+        assert result.returncode != 0
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:3005: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': False, 'device_name': None, 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_chec...n_when_torch_import_exits0/dxg'}, 'error': {'message': 'SystemExit: torch import exited', 'type': 'torch_import'}, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_torch_import_exits0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+_______ test_check_rocm_writes_schema_valid_json_when_torch_import_fails _______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_torch_import_fails0')
+
+    def test_check_rocm_writes_schema_valid_json_when_torch_import_fails(tmp_path: Path) -> None:
+        result, output = _run_check(tmp_path, "raise RuntimeError('torch import failed')\n")
+    
+        assert result.returncode != 0
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:3033: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': False, 'device_name': None, 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_chec...when_torch_import_fails0/dxg'}, 'error': {'message': 'RuntimeError: torch import failed', 'type': 'torch_import'}, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_torch_import_fails0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+____ test_check_rocm_writes_schema_valid_json_when_result_collection_fails _____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_result_collection_fails0')
+
+    def test_check_rocm_writes_schema_valid_json_when_result_collection_fails(tmp_path: Path) -> None:
+        result, output = _run_check(
+            tmp_path,
+            "__version__ = '2.9.1+rocm7.2.0'\n"
+            "class _Version: hip = '7.2.0'\n"
+            "version = _Version()\n"
+            "class _Cuda:\n"
+            "    @staticmethod\n"
+            "    def is_available(): return True\n"
+            "    @staticmethod\n"
+            "    def get_device_name(index): raise RuntimeError('device query failed')\n"
+            "cuda = _Cuda()\n",
+        )
+    
+        assert result.returncode != 0
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:3057: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': True, 'device_name': None, 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_check...t_collection_fails0/dxg'}, 'error': {'message': 'RuntimeError: device query failed', 'type': 'result_collection'}, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_result_collection_fails0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+____ test_check_rocm_writes_schema_valid_json_when_result_collection_exits _____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_result_collection_exits0')
+
+    def test_check_rocm_writes_schema_valid_json_when_result_collection_exits(tmp_path: Path) -> None:
+        result, output = _run_check(
+            tmp_path,
+            "__version__ = '2.9.1+rocm7.2.0'\n"
+            "class _Version: hip = '7.2.0'\n"
+            "version = _Version()\n"
+            "class _Cuda:\n"
+            "    @staticmethod\n"
+            "    def is_available(): return True\n"
+            "    @staticmethod\n"
+            "    def get_device_name(index): raise SystemExit('device query exited')\n"
+            "cuda = _Cuda()\n",
+        )
+    
+        assert result.returncode != 0
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:3081: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': True, 'device_name': None, 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_check...ult_collection_exits0/dxg'}, 'error': {'message': 'SystemExit: device query exited', 'type': 'result_collection'}, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_writes_schema_valid_json_when_result_collection_exits0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+__________ test_check_rocm_separates_fp16_failure_from_fp32_baseline ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_separates_fp16_failure_from_fp32_baseline0')
+
+    def test_check_rocm_separates_fp16_failure_from_fp32_baseline(tmp_path: Path) -> None:
+        result, output = _run_check(
+            tmp_path,
+            "__version__ = '2.9.1+rocm7.2.0'\n"
+            "class _Version: hip = '7.2.0'\n"
+            "version = _Version()\n"
+            "float32 = 'float32'\n"
+            "float16 = 'float16'\n"
+            "class _Value:\n"
+            "    def all(self): return self\n"
+            "    def item(self): return True\n"
+            "class _Cuda:\n"
+            "    @staticmethod\n"
+            "    def is_available(): return True\n"
+            "    @staticmethod\n"
+            "    def get_device_name(index): return 'AMD Radeon RX 7900 XT'\n"
+            "cuda = _Cuda()\n"
+            "def ones(shape, *, dtype, device):\n"
+            "    if dtype == float16: raise RuntimeError('fp16 unsupported')\n"
+            "    return object()\n"
+            "def matmul(left, right): return object()\n"
+            "def isfinite(value): return _Value()\n",
+        )
+    
+        assert result.returncode == 2, result.stderr
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:3113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': True, 'device_name': 'AMD Radeon RX 7900 XT', 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_check_rocm_separates_fp16_failure_from_fp32_baseline0/dxg'}, 'error': None, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_separates_fp16_failure_from_fp32_baseline0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+_____________ test_check_rocm_records_finite_fp32_and_fp16_results _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_records_finite_fp32_and_fp16_results0')
+
+    def test_check_rocm_records_finite_fp32_and_fp16_results(tmp_path: Path) -> None:
+        result, output = _run_check(
+            tmp_path,
+            "__version__ = '2.9.1+rocm7.2.0'\n"
+            "class _Version: hip = '7.2.0'\n"
+            "version = _Version()\n"
+            "float32 = 'float32'\n"
+            "float16 = 'float16'\n"
+            "class _Value:\n"
+            "    def all(self): return self\n"
+            "    def item(self): return True\n"
+            "class _Cuda:\n"
+            "    @staticmethod\n"
+            "    def is_available(): return True\n"
+            "    @staticmethod\n"
+            "    def get_device_name(index): return 'AMD Radeon RX 7900 XT'\n"
+            "cuda = _Cuda()\n"
+            "def ones(shape, *, dtype, device): return object()\n"
+            "def matmul(left, right): return object()\n"
+            "def isfinite(value): return _Value()\n",
+        )
+    
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(output.read_text(encoding="utf-8"))
+>       _assert_json_identity(payload, tmp_path)
+
+tests/test_rocm_scripts.py:3146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'cuda_available': True, 'device_name': 'AMD Radeon RX 7900 XT', 'dxg': {'exists': True, 'path': '/tmp/pytest-of-root/pytest-2/test_check_rocm_records_finite_fp32_and_fp16_results0/dxg'}, 'error': None, ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-2/test_check_rocm_records_finite_fp32_and_fp16_results0')
+
+    def _assert_json_identity(payload: dict[str, object], tmp_path: Path) -> None:
+        assert payload["profile"] == "rx7900xt"
+        assert payload["runtime"] == "legacy"
+        assert payload["os"]["id"] == "ubuntu"  # type: ignore[index]
+        assert payload["os"]["version_id"] == "22.04"  # type: ignore[index]
+        expected_executable = (
+            "/usr/bin/python3" if sys.platform == "win32" else os.path.abspath(sys.executable)
+        )
+        expected_version = "3.10.12" if sys.platform == "win32" else platform.python_version()
+>       assert payload["python"]["executable"] == expected_executable  # type: ignore[index]
+E       AssertionError: assert '/usr/bin/python3' == '/mnt/e/vhs-u...cm/bin/python'
+E         
+E         - /mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm/bin/python
+E         + /usr/bin/python3
+
+tests/test_rocm_scripts.py:2939: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_rocm_scripts.py::test_runtime_probe_reports_legacy_hsa_guard_without_host_changes
+FAILED tests/test_rocm_scripts.py::test_replacement_between_rollback_validation_and_quarantine_is_preserved
+FAILED tests/test_rocm_scripts.py::test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved
+FAILED tests/test_rocm_scripts.py::test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[INT-130]
+FAILED tests/test_rocm_scripts.py::test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[TERM-143]
+FAILED tests/test_rocm_scripts.py::test_new_venv_is_rolled_back_after_failure_and_retry_can_recreate_it
+FAILED tests/test_rocm_scripts.py::test_failed_install_retains_owned_staging_without_publishing_venv
+FAILED tests/test_rocm_scripts.py::test_retained_staging_is_reused_by_direct_retry
+FAILED tests/test_rocm_scripts.py::test_check_rocm_accepts_a_validated_venv_runtime_marker
+FAILED tests/test_rocm_scripts.py::test_check_rocm_writes_schema_valid_json_when_torch_import_exits
+FAILED tests/test_rocm_scripts.py::test_check_rocm_writes_schema_valid_json_when_torch_import_fails
+FAILED tests/test_rocm_scripts.py::test_check_rocm_writes_schema_valid_json_when_result_collection_fails
+FAILED tests/test_rocm_scripts.py::test_check_rocm_writes_schema_valid_json_when_result_collection_exits
+FAILED tests/test_rocm_scripts.py::test_check_rocm_separates_fp16_failure_from_fp32_baseline
+FAILED tests/test_rocm_scripts.py::test_check_rocm_records_finite_fp32_and_fp16_results
+15 failed, 93 passed in 72.24s (0:01:12)

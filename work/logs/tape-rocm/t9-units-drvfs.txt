@@ -1,0 +1,14 @@
+..............................................F......................... [ 66%]
+....................................                                     [100%]
+=================================== FAILURES ===================================
+_ test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[HUP-129] _
+tests/test_rocm_scripts.py:2020: in test_readiness_failure_after_spawn_drains_group_and_honors_first_signal
+    assert "started" in marker.read_text(encoding="utf-8")
+/usr/lib/python3.10/pathlib.py:1134: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+/usr/lib/python3.10/pathlib.py:1119: in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+E   FileNotFoundError: [Errno 2] No such file or directory: '/mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.task4-pytest-tmp/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[HUP-129]-3eecad1b08894a75892d9d1758d595c8/readiness-failure'
+=========================== short test summary info ============================
+FAILED tests/test_rocm_scripts.py::test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[HUP-129]
+1 failed, 107 passed in 108.01s (0:01:48)

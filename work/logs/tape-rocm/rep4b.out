@@ -1,0 +1,24 @@
+RC= 127
+---OUT---
+
+---RESULT DIRS---
+'dxg'
+'fake-bin'
+'os-release'
+'out.txt'
+'python3'
+'temporary'
+'trace.txt'
+---STAGING/QUARANTINE CONTENTS---
+===OUT-END===
+===DIRS===
+total 28
+drwxr-xr-x  4 root root 4096 Sep 18 11:23 .
+drwxrwxrwt 27 root root 4096 Sep 18 11:23 ..
+-rw-r--r--  1 root root    0 Sep 18 11:23 dxg
+drwxr-xr-x  2 root root 4096 Sep 18 11:23 fake-bin
+-rwxr-xr-x  1 root root   43 Sep 18 11:23 os-release
+-rw-r--r--  1 root root    0 Sep 18 11:23 out.txt
+-rwxr-xr-x  1 root root  504 Sep 18 11:23 python3
+drwxr-xr-x  2 root root 4096 Sep 18 11:23 temporary
+-rw-r--r--  1 root root  552 Sep 18 11:23 trace.txt

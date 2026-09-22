@@ -1,0 +1,40 @@
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-1/test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[HUP-129]0/readiness-failure'
+
+/usr/lib/python3.10/pathlib.py:1119: FileNotFoundError
+______ test_failed_install_retains_owned_staging_without_publishing_venv _______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_install_retains_owned_staging_without_publishing_venv0')
+
+    def test_failed_install_retains_owned_staging_without_publishing_venv(
+        tmp_path: Path,
+    ) -> None:
+        host = _fake_host(tmp_path, venv_pip="fail")
+        venv = tmp_path / ".venv-rocm"
+        temp_root = tmp_path / "temporary"
+        temp_root.mkdir()
+    
+        result = _run_setup_with_fake_commands(
+            ["--runtime", "legacy", *_setup_args(host, venv), "--tmp-root", str(temp_root)],
+            marker=tmp_path / "staging-contract",
+        )
+    
+        assert result.returncode != 0, _combined(result)
+        assert not venv.exists()
+        staging_paths = list(tmp_path.glob(".venv-rocm.staging.*"))
+>       assert len(staging_paths) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_rocm_scripts.py:2375: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_rocm_scripts.py::test_replacement_between_rollback_validation_and_quarantine_is_preserved
+FAILED tests/test_rocm_scripts.py::test_inode_replacement_between_rollback_validation_and_quarantine_is_preserved
+FAILED tests/test_rocm_scripts.py::test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[INT-130]
+FAILED tests/test_rocm_scripts.py::test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[TERM-143]
+FAILED tests/test_rocm_scripts.py::test_readiness_failure_after_spawn_drains_group_and_honors_first_signal[HUP-129]
+FAILED tests/test_rocm_scripts.py::test_failed_install_retains_owned_staging_without_publishing_venv
+6 failed, 102 passed in 97.70s (0:01:37)

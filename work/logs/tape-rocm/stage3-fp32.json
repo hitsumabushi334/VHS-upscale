@@ -1,0 +1,66 @@
+{
+  "checkpoint": "/mnt/e/vhs-upscale/work/assets/checkpoint.pth",
+  "constructor_args": {
+    "depths": [
+      2,
+      2,
+      6,
+      2
+    ],
+    "embed_dim": 96,
+    "in_chans": 3,
+    "num_heads": [
+      8,
+      8,
+      8,
+      8
+    ],
+    "window_size": [
+      2,
+      8,
+      8
+    ]
+  },
+  "container": "raw_state_dict",
+  "device": "cuda",
+  "error": null,
+  "forward": {
+    "clamped": false,
+    "finite": true,
+    "input_range": [
+      0.0,
+      0.0
+    ],
+    "input_shape": [
+      1,
+      5,
+      3,
+      64,
+      64
+    ],
+    "output_dtype": "torch.float32",
+    "output_shape": [
+      1,
+      5,
+      3,
+      64,
+      64
+    ],
+    "peak_memory_allocated_bytes": 641969664,
+    "peak_memory_delta_bytes": 641969664,
+    "peak_memory_reserved_bytes": 681574400,
+    "reference_shape": [
+      1,
+      5,
+      3,
+      64,
+      64
+    ]
+  },
+  "loader": "weights_only",
+  "loader_error": null,
+  "missing_keys": [],
+  "precision": "fp32",
+  "status": "ok",
+  "unexpected_keys": []
+}

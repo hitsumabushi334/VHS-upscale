@@ -1,0 +1,30 @@
+# TAPE code repos (own git history, consumed via PR)
+TAPE/
+worktrees/
+
+# Large artifacts / scratch
+work/tmp/
+work/assets/
+work/tape-smoke/
+work/tape-smoke-704x396/
+work/tape-smoke-704x396-metrics/
+work/tape-smoke-failed-20260919/
+work/qtgmc-bestsource-zobc6mlb/
+work/rocm-staging-quarantine/
+work/.fstest-drvfs/
+
+# Test debris / caches
+task4-*/
+.task4-third-sanitizer/
+pytest-cache-files-*/
+graphify-out/
+.serena/
+.pytest-basetemp/
+__pycache__/
+*.pyc
+.venv*/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,3 @@
+advisors:
+  - name: default
+    model: cursor/cursor-grok-4.6:high
