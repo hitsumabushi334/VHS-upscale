@@ -1,4 +1,7 @@
 #!/bin/bash
+# DEPRECATED 2026-09-22: pre-restructure script; pipeline tests moved to the
+# /mnt/e/vhs-upscale root. Use gate_root_wsl.sh for the canonical root gate.
+# Kept as historical record only.
 set -o pipefail
 
 cd /mnt/e/vhs-upscale/worktrees/tape-qtgmc-long-processing
