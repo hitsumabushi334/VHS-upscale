@@ -44,6 +44,8 @@ from pipeline.media_contract import (  # noqa: E402
     ffprobe_json,
 )
 
+from pipeline.paths import resolve_tape_worktree  # noqa: E402
+
 DEFAULT_INFERENCES: Tuple[Tuple[str, int, int], ...] = (("default", 5, 5),)
 
 PRESERVED_FIELDS: Tuple[str, ...] = (
@@ -692,7 +694,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--python", type=Path, default=Path(sys.executable))
-    parser.add_argument("--worktree", type=Path, default=Path(__file__).resolve().parents[1] / "worktrees" / "tape-qtgmc-long-processing")
+    parser.add_argument("--worktree", type=Path, default=resolve_tape_worktree())
     parser.add_argument("--patch-size", type=int, default=512)
     return parser
 

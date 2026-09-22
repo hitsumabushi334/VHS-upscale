@@ -37,8 +37,14 @@ TAPE のコードを import せず、明示パス(WSL subprocess)で呼び出す
   (external reference mode CLI)、`data/real_world_video_dataset.py`、
   `utils/` の reference 選択 helpers(CLIP prompt ensemble・Otsu)、ROCm
   環境スクリプト、TAPE 側テスト。
-- 制約: TAPE worktree は上記パスに置くこと(このレポジトリの `conftest.py`
-  と `scripts/run_short_inference.py --worktree` の default が前提とする)。
+- このレポジトリの `utils/`(reference 選択・フレーム helpers)は自己完結した
+  コピーを持つ。root の pipeline とテストは root の `utils/` を使い、
+  worktree の `real_world_inference.py` は worktree 側の `utils/` を使う。
+  相互 import はしない。
+- 制約: TAPE worktree は上記パスに置くこと(`pipeline/paths.py` の
+  `resolve_tape_worktree` が default として前提する。`pipeline/run_local.py`
+  と `scripts/run_short_inference.py --worktree` が共通で使う。
+  `TAPE_WORKTREE` 環境変数または明示引数で上書き可能)。
 - ROCm 実行環境(PyTorch/HIP venv)は
   `E:/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm`
   (WSL 側では `/mnt/e/vhs-upscale/worktrees/tape-rocm-rx7900xt-luna/.venv-rocm`)。

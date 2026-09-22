@@ -1,19 +1,18 @@
-"""Task 9 contracts for TAPE external reference mode."""
+"""Task 10-11 contracts for the chunk worker, overlap trim, and FFV1 chunks.
+
+Root-side pipeline tests. These tests drive pipeline.tape_chunk against stub
+TAPE runners; they never import TAPE code (real_world_inference) directly.
+"""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-import sys
 import shutil
 import uuid
 import types
 
-import numpy as np
-from PIL import Image
 import pytest
-
-import real_world_inference as rwi
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,170 +29,6 @@ def tmp_path() -> Path:
         shutil.rmtree(path, ignore_errors=True)
 
 
-def _write_png(path: Path, value: int) -> None:
-    Image.fromarray(np.full((4, 6, 3), value, dtype=np.uint8), mode="RGB").save(path)
-
-
-def _external_roots(tmp_path: Path, *, reference_count: int = 2) -> tuple[Path, Path, Path]:
-    input_root = tmp_path / "input_frames"
-    reference_root = tmp_path / "reference_frames"
-    mapping_path = tmp_path / "references.json"
-    input_root.mkdir()
-    reference_root.mkdir()
-
-    input_names = ["000000028.png", "000000029.png", "000000030.png"]
-    for index, name in enumerate(input_names):
-        _write_png(input_root / name, index + 1)
-    reference_names = ["000000001.png", "000000002.png"]
-    for index, name in enumerate(reference_names):
-        _write_png(reference_root / name, index + 10)
-    mapping_path.write_text(
-        json.dumps({name: reference_names[:reference_count] for name in input_names}),
-        encoding="utf-8",
-    )
-    return input_root, mapping_path, reference_root
-
-
-def _external_argv(
-    input_root: Path,
-    mapping_path: Path,
-    reference_root: Path,
-    output_root: Path,
-    *,
-    reference_count: int = 2,
-) -> list[str]:
-    return [
-        "--input-path", "source.mkv",
-        "--output-path", str(output_root),
-        "--input-frames-path", str(input_root),
-        "--reference-map-path", str(mapping_path),
-        "--reference-frames-path", str(reference_root),
-        "--skip-reference-selection",
-        "--global-start-frame", "28",
-        "--num-reference-frames", str(reference_count),
-        "--preprocess-mode", "none",
-        "--num-workers", "0",
-    ]
-
-
-def _fake_torch(monkeypatch: pytest.MonkeyPatch) -> None:
-    class _Cuda:
-        @staticmethod
-        def is_available() -> bool:
-            return False
-
-    class _Device:
-        type = "cpu"
-
-    monkeypatch.setitem(
-        sys.modules,
-        "torch",
-        types.SimpleNamespace(cuda=_Cuda(), device=lambda _name: _Device()),
-    )
-
-
-def test_external_parser_accepts_complete_argument_set(tmp_path: Path) -> None:
-    input_root, mapping_path, reference_root = _external_roots(tmp_path)
-    args = rwi.build_parser().parse_args(
-        _external_argv(input_root, mapping_path, reference_root, tmp_path / "out")
-    )
-
-    assert args.input_frames_path == Path(input_root)
-    assert args.reference_map_path == Path(mapping_path)
-    assert args.reference_frames_path == Path(reference_root)
-    assert args.skip_reference_selection is True
-    assert args.global_start_frame == 28
-
-
-@pytest.mark.parametrize(
-    "removed",
-    [
-        "--input-frames-path",
-        "--reference-map-path",
-        "--reference-frames-path",
-        "--skip-reference-selection",
-        "--global-start-frame",
-    ],
-)
-def test_external_parser_rejects_partial_argument_sets(tmp_path: Path, removed: str) -> None:
-    input_root, mapping_path, reference_root = _external_roots(tmp_path)
-    argv = _external_argv(input_root, mapping_path, reference_root, tmp_path / "out")
-    if removed in argv:
-        index = argv.index(removed)
-        del argv[index : index + (1 if removed == "--skip-reference-selection" else 2)]
-
-    with pytest.raises(SystemExit) as exc_info:
-        rwi.build_parser().parse_args(argv)
-
-    assert exc_info.value.code == 2
-
-
-def test_external_mode_skips_video_decode_and_reference_selection(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    input_root, mapping_path, reference_root = _external_roots(tmp_path)
-    _fake_torch(monkeypatch)
-    calls: dict[str, object] = {}
-
-    def fail_extract(*_args: object, **_kwargs: object) -> None:
-        raise AssertionError("video extraction must not run in external mode")
-
-    def fail_select(*_args: object, **_kwargs: object) -> None:
-        raise AssertionError("reference selection must not run in external mode")
-
-    def capture_restore(**kwargs: object) -> None:
-        calls.update(kwargs)
-
-    monkeypatch.setattr(rwi, "extract_video_frames", fail_extract)
-    monkeypatch.setattr(rwi, "select_references", fail_select)
-    monkeypatch.setattr(rwi, "restore_frames", capture_restore)
-
-    args = rwi.build_parser().parse_args(
-        _external_argv(input_root, mapping_path, reference_root, tmp_path / "out")
-    )
-    rwi.real_world_test(args)
-
-    assert calls["input_frames_folder"] == input_root
-    assert calls["references_file_path"] == mapping_path
-    assert calls["reference_frames_folder"] == reference_root
-
-
-@pytest.mark.parametrize("problem", ["missing_mapping_key", "missing_reference", "short_mapping", "name_mismatch"])
-def test_external_validation_fails_before_model_load(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    problem: str,
-) -> None:
-    input_root, mapping_path, reference_root = _external_roots(tmp_path)
-    mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
-    if problem == "missing_mapping_key":
-        del mapping["000000029.png"]
-    elif problem == "missing_reference":
-        mapping["000000029.png"] = ["000000999.png", "000000001.png"]
-    elif problem == "short_mapping":
-        mapping["000000029.png"] = ["000000001.png"]
-    elif problem == "name_mismatch":
-        del mapping["000000029.png"]
-        mapping["000000031.png"] = ["000000001.png", "000000002.png"]
-    mapping_path.write_text(json.dumps(mapping), encoding="utf-8")
-
-    _fake_torch(monkeypatch)
-    model_load_reached: list[bool] = []
-    monkeypatch.setattr(rwi, "extract_video_frames", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(rwi, "select_references", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(
-        rwi,
-        "restore_frames",
-        lambda **_kwargs: model_load_reached.append(True),
-    )
-
-    args = rwi.build_parser().parse_args(
-        _external_argv(input_root, mapping_path, reference_root, tmp_path / "out")
-    )
-    with pytest.raises((ValueError, FileNotFoundError, KeyError)):
-        rwi.real_world_test(args)
-
-    assert model_load_reached == []
 def _task10_media() -> dict[str, object]:
     return {
         "width": 720,

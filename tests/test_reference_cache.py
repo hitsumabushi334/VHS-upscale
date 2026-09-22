@@ -6,8 +6,6 @@ import copy
 import os
 from pathlib import Path
 import shutil
-import subprocess
-import sys
 import uuid
 
 import numpy as np
@@ -34,7 +32,6 @@ from utils.reference_selection import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TAPE_WORKTREE = ROOT / "worktrees" / "tape-qtgmc-long-processing"
 REAL_CLIP = (
     Path(r"E:\vhs-upscale\input\VHS_10s_704x396.mkv")
     if os.name == "nt"
@@ -367,19 +364,3 @@ def test_corrupt_scopes_are_rejected_and_rebuilt_individually(tmp_path: Path) ->
     cache.build_mapping()
     assert cache.validate()
 
-
-def test_real_world_inference_imports_without_torch() -> None:
-    environment = os.environ.copy()
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            "import real_world_inference as m; assert callable(m.extract_video_frames); assert callable(m.select_references); assert callable(m.restore_frames)",
-        ],
-        cwd=TAPE_WORKTREE,
-        env=environment,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr

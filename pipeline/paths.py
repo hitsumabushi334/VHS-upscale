@@ -84,3 +84,17 @@ def _absolute_wsl_path(path: str | os.PathLike[str], label: str) -> str:
     if not pure_path.is_absolute():
         raise ValueError(f"WSL {label} path must be absolute: {value}")
     return value
+
+
+def resolve_tape_worktree(explicit: Path | None = None) -> Path:
+    """Resolve the TAPE patch-checkout path.
+
+    Precedence: explicit argument > TAPE_WORKTREE environment variable >
+    the pinned local worktree (worktrees/tape-qtgmc-long-processing).
+    """
+    if explicit is not None:
+        return Path(explicit)
+    env_value = os.environ.get("TAPE_WORKTREE")
+    if env_value:
+        return Path(env_value)
+    return Path(__file__).resolve().parents[1] / "worktrees" / "tape-qtgmc-long-processing"
