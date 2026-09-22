@@ -34,6 +34,7 @@ from utils.reference_selection import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TAPE_WORKTREE = ROOT / "worktrees" / "tape-qtgmc-long-processing"
 REAL_CLIP = (
     Path(r"E:\vhs-upscale\input\VHS_10s_704x396.mkv")
     if os.name == "nt"
@@ -375,7 +376,7 @@ def test_real_world_inference_imports_without_torch() -> None:
             "-c",
             "import real_world_inference as m; assert callable(m.extract_video_frames); assert callable(m.select_references); assert callable(m.restore_frames)",
         ],
-        cwd=ROOT,
+        cwd=TAPE_WORKTREE,
         env=environment,
         capture_output=True,
         text=True,

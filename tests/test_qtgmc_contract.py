@@ -120,7 +120,7 @@ def _qtgmc():
 
 
 def _task6_temp_dir() -> Path:
-    root = Path.cwd().parents[1] / "work" / "logs" / "qtgmc-long-processing"
+    root = Path(__file__).resolve().parents[1] / "work" / "logs" / "qtgmc-long-processing"
     return root / f"task6-test-{uuid.uuid4().hex}"
 
 
