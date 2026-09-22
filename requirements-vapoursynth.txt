@@ -1,0 +1,3 @@
+--extra-index-url https://jaded-encoding-thaumaturgy.github.io/vs-wheels/simple
+vapoursynth==79
+vsjetpack[deinterlace,source]==2.2.4
