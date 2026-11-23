@@ -20,9 +20,6 @@ def normalize_clip_features(features: Any, axis: int = -1) -> np.ndarray:
     return values / np.maximum(norms, 1e-12)
 
 
-clip_normalize = normalize_clip_features
-
-
 def prompt_ensemble(encoded_text_features: Any) -> np.ndarray:
     """Normalize prompt embeddings, average them, and normalize the mean."""
     values = normalize_clip_features(encoded_text_features, axis=-1)
@@ -30,9 +27,6 @@ def prompt_ensemble(encoded_text_features: Any) -> np.ndarray:
         raise ValueError("encoded_text_features must be a non-empty 2-D array")
     mean_feature = values.mean(axis=0, keepdims=True)
     return normalize_clip_features(mean_feature, axis=-1)
-
-
-prompt_ensemble_features = prompt_ensemble
 
 
 def compute_clean_scores(image_features: Any, text_features: Any) -> np.ndarray:
@@ -47,7 +41,6 @@ def compute_clean_scores(image_features: Any, text_features: Any) -> np.ndarray:
 
 
 clean_scores = compute_clean_scores
-clean_score = compute_clean_scores
 
 
 def otsu_threshold(values: Any, *, bins: int = 256) -> float:
@@ -112,7 +105,4 @@ def clean_candidate_indices(
     threshold_index = int(np.searchsorted(sorted_scores, resolved_threshold))
     indexes = np.argsort(scores, kind="stable")[:threshold_index]
     return indexes.astype(np.int64, copy=False), resolved_threshold
-
-
-select_clean_candidates = clean_candidate_indices
 
