@@ -238,7 +238,6 @@ _DEPENDENCY_TABLE: tuple[tuple[frozenset[str], str | None], ...] = (
         None,
     ),
 )
-DEPENDENCY_TABLE = _DEPENDENCY_TABLE
 
 
 def stage_signature(
@@ -273,9 +272,6 @@ def source_fingerprint(
             "ffprobe_contract_sha256": sha256_json(ffprobe_contract),
         }
     )
-
-
-compute_source_fingerprint = source_fingerprint
 
 
 def load_manifest(path: Path) -> RunManifest:
