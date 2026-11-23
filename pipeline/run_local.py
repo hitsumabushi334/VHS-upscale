@@ -1444,13 +1444,6 @@ def _read_gpu_lock(lock_path: Path) -> dict[str, Any]:
     }
 
 
-def _write_gpu_lock_atomic(lock_path: Path, payload: Mapping[str, Any]) -> None:
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = lock_path.with_name(f"{lock_path.name}.{os.getpid()}.tmp")
-    temporary.write_text(json.dumps(dict(payload), sort_keys=True), encoding="utf-8")
-    os.replace(temporary, lock_path)
-
-
 def _create_gpu_lock_exclusive(lock_path: Path, payload: Mapping[str, Any]) -> None:
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
