@@ -143,9 +143,6 @@ def cache_key(materials: Mapping[str, Any] | None = None, **overrides: Any) -> s
 
 
 reference_cache_key = cache_key
-build_cache_key = cache_key
-make_cache_key = cache_key
-compute_cache_key = cache_key
 
 
 def frame_name(index: int) -> str:
@@ -247,10 +244,6 @@ def decode_video_range(
         if process.poll() is None:
             process.kill()
         process.communicate()
-
-
-decode_preprocessed_video_range = decode_video_range
-iter_video_frames = decode_video_range
 
 
 def _sha256_file(path: Path) -> str:
@@ -918,8 +911,3 @@ def build_feature_shards(
     encoder: Any,
 ) -> dict[str, Any]:
     return cache.build_feature_shards(frame_source, encoder)
-
-
-compute_feature_shards = build_feature_shards
-validate_reference_cache = ReferenceCache.validate
-validate_chunk_cache_request = ReferenceCache.validate_chunk_request
