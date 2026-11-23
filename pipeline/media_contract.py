@@ -512,11 +512,6 @@ def analyze_long_media(
     return preflight_long(Path(probe_or_path), overrides=overrides)
 
 
-# Task 12 forward-compatibility hooks (plan L844 Extend); unused by Task 5.
-build_media_manifest = build_long_manifest
-long_preflight = preflight_long
-
-
 def sha256_of(path: Path) -> str:
     """Return the SHA-256 digest of a file."""
 
@@ -555,11 +550,6 @@ def verify_file_unchanged(path: Path, before: Mapping[str, Any]) -> dict[str, An
     }
 
 
-input_fingerprint = capture_file_fingerprint
-verify_input_unchanged = verify_file_unchanged
-validate_input_unchanged = verify_file_unchanged
-
-
 def reject_output_path_overlap(input_path: Path, output_path: Path) -> None:
     """Reject an output path equal to or below the input path."""
 
@@ -573,16 +563,6 @@ def reject_output_path_overlap(input_path: Path, output_path: Path) -> None:
     raise PreflightError(
         "output path must not equal or be below input path: {}".format(output_path)
     )
-
-
-ensure_output_path_safe = reject_output_path_overlap
-validate_output_path = reject_output_path_overlap
-
-def eight_bit_boundary_warning() -> str:
-    """Return the fixed 8-bit boundary warning required in verify reports."""
-
-    return _EIGHT_BIT_BOUNDARY_WARNING
-
 
 def public_artifact_basename(source_path: Path | str, source_sha256: str) -> str:
     """Return the ``<safe_stem>-<hash12>`` prefix used for published artifacts."""
