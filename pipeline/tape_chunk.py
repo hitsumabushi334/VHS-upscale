@@ -234,32 +234,6 @@ def _validate_partial_against_request(
             raise ValueError("chunk sar mismatch")
 
 
-def validate_chunk(result: ChunkResult, request: TapeChunkRequest) -> None:
-    """Re-probe a published chunk and sidecar against the request contract."""
-
-    if result.chunk_ffv1 is None or result.sidecar is None:
-        raise ValueError("chunk result is not published")
-    sidecar = json.loads(result.sidecar.read_text(encoding="utf-8"))
-    chunk = request.chunk
-    if sidecar["chunk_index"] != chunk.index:
-        raise ValueError("sidecar chunk_index mismatch")
-    if sidecar["core_start"] != chunk.core_start:
-        raise ValueError("sidecar core_start mismatch")
-    if sidecar["core_end"] != chunk.core_end:
-        raise ValueError("sidecar core_end mismatch")
-    if sidecar["decode_start"] != chunk.decode_start:
-        raise ValueError("sidecar decode_start mismatch")
-    if sidecar["decode_end"] != chunk.decode_end:
-        raise ValueError("sidecar decode_end mismatch")
-    if sidecar["avg_frame_rate"] != request.tape_fps:
-        raise ValueError("sidecar avg_frame_rate mismatch")
-    _validate_partial_against_request(
-        result.chunk_ffv1,
-        request,
-        chunk.core_end - chunk.core_start,
-    )
-
-
 def _build_wsl_args(request: TapeChunkRequest, work_dir: Path) -> list[str]:
     return [
         "--input-path",
